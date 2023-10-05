@@ -125,6 +125,10 @@ public class ClusterMetadataService
 
     private final AtomicBoolean commitsPaused = new AtomicBoolean();
 
+    /**
+     * Returns the state of the {@code ClusteMetadataService}.
+     * @return the state of the {@code ClusteMetadataService}.
+     */
     public static State state()
     {
         return state(ClusterMetadata.current());
@@ -141,7 +145,7 @@ public class ClusterMetadataService
         // The node is a full member of the CMS if it has started participating in reads for distributed metadata table (which
         // implies it is a write replica as well). In other words, it's a fully joined member of the replica set responsible for
         // the distributed metadata table.
-        if (ClusterMetadata.current().isCMSMember(FBUtilities.getBroadcastAddressAndPort()))
+        if (metadata.isCMSMember(FBUtilities.getBroadcastAddressAndPort()))
             return LOCAL;
         return REMOTE;
     }

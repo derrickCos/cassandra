@@ -1968,6 +1968,13 @@ public final class SystemKeyspace
         }
     }
 
+    /**
+     * Insert the cluster metadata snapshot into the {@code metadata_snapshot} table.
+     *
+     * @param epoch the snapshot epoch
+     * @param period the period to which the snapshot belong
+     * @param snapshot the snapshot to store
+     */
     public static void storeSnapshot(Epoch epoch, long period, ByteBuffer snapshot)
     {
         logger.info("Storing snapshot of cluster metadata at epoch {} (period {})", epoch, period);
@@ -1975,6 +1982,12 @@ public final class SystemKeyspace
         executeInternal(query, epoch.getEpoch(), period, snapshot);
     }
 
+    /**
+     * Retrieves the cluster metadata snapshot for the specified epoch from the {@code metadata_snapshot} table.
+     *
+     * @param epoch the epoch for which the snapshot must be retrieved
+     * @return the cluster metadata snapshot for the specified epoch or {@code null} if no snapshot exists for the epoch.
+     */
     public static ByteBuffer getSnapshot(Epoch epoch)
     {
         logger.info("Getting snapshot of epoch = {}", epoch);
@@ -2029,6 +2042,7 @@ public final class SystemKeyspace
         long maxPeriod = res.one().getLong("period");
         return new Sealed(maxPeriod + 1, maxEpoch + 1);
     }
+
 
     public static Sealed getLastSealedPeriod()
     {

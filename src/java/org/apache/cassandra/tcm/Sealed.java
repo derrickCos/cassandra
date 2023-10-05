@@ -30,12 +30,28 @@ import org.slf4j.LoggerFactory;
 import org.apache.cassandra.config.CassandraRelevantProperties;
 import org.apache.cassandra.db.SystemKeyspace;
 
+/**
+ * A period that has been sealed.
+ * <p>
+ * A period is an implementation detail of having the logs stored in C* tables. It is the partition key of
+ * the log table and allows to keep partitions to a manageable size. Periods are "sealed" when the period number
+ * is bumped and a new partition is used to store transformations in the log table.
+ * </p>
+ */
 public class Sealed implements Comparable<Sealed>
 {
     private static final Logger logger = LoggerFactory.getLogger(Sealed.class);
 
     public static final Sealed EMPTY = new Sealed(Period.EMPTY, Epoch.EMPTY);
+
+    /**
+     * The period number
+     */
     public final long period;
+
+    /**
+     * The latest epoch of the period
+     */
     public final Epoch epoch;
 
     private static final AtomicReference<RecentlySealedPeriods> index = new AtomicReference<>(RecentlySealedPeriods.EMPTY);

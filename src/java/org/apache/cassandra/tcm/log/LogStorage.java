@@ -22,7 +22,14 @@ import org.apache.cassandra.tcm.Epoch;
 
 public interface LogStorage extends LogReader
 {
+    /**
+     * Appends the log entry to the period
+     * @param period the period to which the log entry belong
+     * @param entry the log entry
+     */
     void append(long period, Entry entry);
+
+
     LogState getLogState(Epoch since);
 
     /**
