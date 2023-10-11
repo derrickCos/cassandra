@@ -107,12 +107,12 @@ public class FilterTree
                 if (TypeUtil.isNonFrozenCollection(column.type))
                 {
                     Iterator<ByteBuffer> valueIterator = filter.context.getValuesOf(row, now);
-                    result = op.apply(result, collectionMatch(valueIterator, filter));
+                    result = op.apply(result, filter.isSatisfiedBy(valueIterator));
                 }
                 else
                 {
                     ByteBuffer value = filter.context.getValueOf(key, row, now);
-                    result = op.apply(result, singletonMatch(value, filter));
+                    result = op.apply(result, filter.isSatisfiedBy(value));
                 }
 
                 if (shouldReturnNow(result))

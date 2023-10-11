@@ -25,6 +25,7 @@ import java.util.PriorityQueue;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import org.apache.cassandra.index.sasi.disk.Token;
 import org.apache.cassandra.io.util.FileUtils;
 
 /**
@@ -79,6 +80,11 @@ public abstract class RangeIterator extends AbstractIterator<PrimaryKey> impleme
     public final long getCount()
     {
         return count;
+    }
+
+    public final PrimaryKey nextOrNull()
+    {
+        return hasNext() ? next() : null;
     }
 
     /**
