@@ -604,7 +604,7 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
         // and this is why we have some UNUSEDX for values we don't use anymore
         // (we could clean those on a major protocol update, but it's not worth
         // the trouble for now)
-        protected enum Kind { SIMPLE, MAP_EQUALITY, UNUSED1, CUSTOM, USER }
+        protected enum Kind { SIMPLE, MAP_COMPARISON, UNUSED1, CUSTOM, USER }
 
         protected abstract Kind kind();
         protected final ColumnMetadata column;
@@ -762,7 +762,7 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
                     case SIMPLE:
                         ByteBufferUtil.writeWithShortLength(expression.value, out);
                         break;
-                    case MAP_EQUALITY:
+                    case MAP_COMPARISON:
                         MapComparisonExpression mexpr = (MapComparisonExpression)expression;
                         ByteBufferUtil.writeWithShortLength(mexpr.key, out);
                         ByteBufferUtil.writeWithShortLength(mexpr.value, out);
@@ -798,7 +798,7 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
                 {
                     case SIMPLE:
                         return new SimpleExpression(column, operator, ByteBufferUtil.readWithShortLength(in));
-                    case MAP_EQUALITY:
+                    case MAP_COMPARISON:
                         ByteBuffer key = ByteBufferUtil.readWithShortLength(in);
                         ByteBuffer value = ByteBufferUtil.readWithShortLength(in);
                         return new MapComparisonExpression(column, key, operator, value);
@@ -821,7 +821,7 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
                     case SIMPLE:
                         size += ByteBufferUtil.serializedSizeWithShortLength(((SimpleExpression)expression).value);
                         break;
-                    case MAP_EQUALITY:
+                    case MAP_COMPARISON:
                         MapComparisonExpression mexpr = (MapComparisonExpression)expression;
                         size += ByteBufferUtil.serializedSizeWithShortLength(mexpr.key)
                               + ByteBufferUtil.serializedSizeWithShortLength(mexpr.value);
@@ -1096,7 +1096,7 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
         @Override
         protected Kind kind()
         {
-            return Kind.MAP_EQUALITY;
+            return Kind.MAP_COMPARISON;
         }
     }
 
