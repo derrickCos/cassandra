@@ -99,4 +99,68 @@ public class EntriesIndexTest extends SAITester
                    row(1), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= 0"));
     }
+
+    // This test requires the ability to reverse lookup multiple rows from a single trie node
+    // The indexing works by having a trie map that maps from a term to an ordinal in the posting list
+    // and the posting list's ordinal maps to a list of primary keys.
+    @Test
+    public void testDifferentEntryWithSameValueInSameSSTable()
+    {
+        createTable("CREATE TABLE %s (partition int primary key, item_cost map<text, int>)");
+        createIndex("CREATE CUSTOM INDEX ON %s(entries(item_cost)) USING 'StorageAttachedIndex'");
+        waitForIndexQueryable();
+
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'apple': 1, 'orange': 2})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (2, {'apple': 2, 'orange': 1})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (3, {'apple': 1, 'orange': 3})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (4, {'apple': 3, 'orange': 2})");
+        flush();
+
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 0"),
+                   row(1), row(2), row(4), row(3));
+    }
+
+    @Test
+    public void testUpdateInvalidatesRowInResultSet()
+    {
+        createTable("CREATE TABLE %s (partition int primary key, item_cost map<text, int>)");
+        createIndex("CREATE CUSTOM INDEX ON %s(entries(item_cost)) USING 'StorageAttachedIndex'");
+        waitForIndexQueryable();
+
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'apple': 1, 'orange': 2})");
+
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"), row(1));
+
+        // Push row from memtable to sstable and expect the same result
+        flush();
+
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"), row(1));
+
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'apple': 2, 'orange': 1})");
+
+        // Expect no rows then make sure we can still get the row
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 3"), row(1));
+
+        // Push row from memtable to sstable and expect the same result
+        flush();
+
+        // Expect no rows then make sure we can still get the row
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 3"), row(1));
+
+        // Now remove the key from the result
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'orange': 1})");
+
+        // Don't get anything
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 3"));
+
+        // Push row from memtable to sstable and expect the same result
+        flush();
+
+        // Don't get anything
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 3"));
+    }
 }
