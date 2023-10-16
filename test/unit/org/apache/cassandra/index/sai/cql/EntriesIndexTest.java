@@ -66,7 +66,8 @@ public class EntriesIndexTest extends SAITester
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 1"),
                    row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 2"), row(2), row(4));
-        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 3"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 3"),
+                   row(4));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= " + Integer.MAX_VALUE));
 
         // LT cases with all, some, and no results
