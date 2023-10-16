@@ -158,6 +158,25 @@ public class Operation
                     {
                         range.add(e.operator(), e.getIndexValue().duplicate());
                     }
+                    else if (e instanceof RowFilter.MapComparisonExpression)
+                    {
+                        var map = (RowFilter.MapComparisonExpression) e;
+                        switch (map.operator()) {
+                            case EQ:
+                                range.add(Operator.EQ, map.getIndexValue().duplicate());
+                                break;
+                            case GT:
+                            case GTE:
+                                range.add(map.operator(), map.getLowerBound().duplicate());
+                                range.add(Operator.LTE, map.getUpperBound().duplicate());
+                                break;
+                            case LT:
+                            case LTE:
+                                range.add(Operator.GTE, map.getLowerBound().duplicate());
+                                range.add(map.operator(), map.getUpperBound().duplicate());
+                                break;
+                        }
+                    }
                     else
                     {
                         while (analyzer.hasNext())

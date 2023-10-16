@@ -1017,6 +1017,16 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
             return CompositeType.build(ByteBufferAccessor.instance, key, value);
         }
 
+        /**
+         * Returns whether the provided row satisfies this expression. For equality, it validates that the row contains
+         * the exact key/value pair. For inequalities, it validates that the row contains the key, then that the value
+         * satisfies the inequality.
+         * @param metadata
+         * @param partitionKey the partition key for row to check.
+         * @param row the row to check. It should *not* contain deleted cells
+         * (i.e. it should come from a RowIterator).
+         * @return whether the row is satisfied by this expression.
+         */
         public boolean isSatisfiedBy(TableMetadata metadata, DecoratedKey partitionKey, Row row)
         {
             assert key != null;
@@ -1097,6 +1107,53 @@ public abstract class RowFilter implements Iterable<RowFilter.Expression>
         protected Kind kind()
         {
             return Kind.MAP_COMPARISON;
+        }
+
+        /**
+         * Get the lower bound for this expression. When the expression is EQ, GT, or GTE, the lower bound is the
+         * expression itself. When the expression is LT or LTE, the lower bound is the map's key becuase
+         * {@link ByteBuffer} comparisons will work correctly.
+         * @return the lower bound for this expression.
+         */
+        public ByteBuffer getLowerBound()
+        {
+            switch (operator) {
+                case EQ:
+                case GT:
+                case GTE:
+                    return this.getIndexValue();
+                case LT:
+                case LTE:
+                    return CompositeType.build(ByteBufferAccessor.instance, key);
+                default:
+                    throw new AssertionError();
+            }
+        }
+
+        /**
+         * Get the upper bound for this expression. When the expression is EQ, LT, or LTE, the upper bound is the
+         * expression itself. When the expression is GT or GTE, the upper bound is the map's key with the last byte
+         * set to 1 so that {@link ByteBuffer} comparisons will work correctly.
+         * @return the upper bound for this express
+         */
+        public ByteBuffer getUpperBound()
+        {
+            switch (operator) {
+                case GT:
+                case GTE:
+                    // TODO this is a leak in the abstraction. Where does this go? It works because we know the way the
+                    // bytes are always indexed with a terminating 0, we can guarantee our
+                    // upper bound is inclusive of all values by setting the last byte to 1
+                    var result = CompositeType.build(ByteBufferAccessor.instance, key);
+                    result.put(result.limit() - 1, (byte) 1);
+                    return result;
+                case EQ:
+                case LT:
+                case LTE:
+                    return this.getIndexValue();
+                default:
+                    throw new AssertionError();
+            }
         }
     }
 

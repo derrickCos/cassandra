@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +35,8 @@ import org.apache.cassandra.index.sai.disk.PostingList;
 import org.apache.cassandra.index.sai.disk.TermsIterator;
 import org.apache.cassandra.index.sai.disk.v1.postings.PostingsReader;
 import org.apache.cassandra.index.sai.disk.v1.postings.ScanningPostingsReader;
+import org.apache.cassandra.index.sai.disk.v1.postings.TraversingPostingsReader;
 import org.apache.cassandra.index.sai.disk.v1.trie.TrieTermsDictionaryReader;
-import org.apache.cassandra.index.sai.disk.v2.sortedterms.SortedTermsReader;
 import org.apache.cassandra.index.sai.disk.v2.sortedterms.TrieRangeIterator;
 import org.apache.cassandra.index.sai.metrics.QueryEventListener;
 import org.apache.cassandra.index.sai.plan.Expression;
@@ -244,7 +245,7 @@ public class TermsReader implements Closeable
                                                                   exp.lowerInclusive,
                                                                   exp.upperInclusive))
             {
-                var iter = reader.iterator();
+                var iter = Iterators.peekingIterator(reader.iterator());
                 if (!iter.hasNext())
                 {
                     FileUtils.closeQuietly(postingsInput);
@@ -254,7 +255,7 @@ public class TermsReader implements Closeable
 
                 context.checkpoint();
 
-                return new PostingsReader(postingsInput, new PostingsReader.BlocksSummary(postingsSummaryInput, iter.next().right), listener.postingListEventListener());
+                return new TraversingPostingsReader(postingsInput, iter, listener.postingListEventListener());
             }
             catch (Throwable e)
             {

@@ -88,20 +88,18 @@ public class TrieRangeIterator extends Walker<TrieRangeIterator>
             initializeNoLeftBound(root, limit != null ? limit.next() : 256);
     }
 
-    public Iterator<Pair<ByteSource, Long>> iterator()
+    public Iterator<Long> iterator()
     {
-        return new AbstractIterator<Pair<ByteSource, Long>>()
+        return new AbstractIterator<>()
         {
             @Override
-            protected Pair<ByteSource, Long> computeNext()
+            protected Long computeNext()
             {
                 final long node = nextPayloadedNode();
-                if (node == -1 || getCurrentPayload() == -1)
-                {
+                long nextPayload;
+                if (node == -1 || (nextPayload = getCurrentPayload()) == -1)
                     return endOfData();
-                }
-                ByteSource byteSource = collector.toByteComparable().asComparableBytes(ByteComparable.Version.OSS41);
-                return Pair.create(byteSource, getCurrentPayload());
+                return nextPayload;
             }
         };
     }

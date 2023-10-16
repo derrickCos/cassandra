@@ -52,17 +52,42 @@ public class EntriesIndexTest extends SAITester
         execute("INSERT INTO %s (partition, item_cost) VALUES (2, {'apple': 2, 'orange': 1})");
         execute("INSERT INTO %s (partition, item_cost) VALUES (3, {'apple': 1, 'orange': 3})");
 
+        // GT cases with all, some, and no results
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 0"),
-                   row(1), row(2), row(3), row(4));
-        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 1"),
-                   row(1), row(2), row(3), row(4));
+                   row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 1"), row(2), row(4));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 2"), row(4));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 3"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > " + Integer.MAX_VALUE));
+
+        // GTE cases with all, some, and no results
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 0"),
+                   row(1), row(2), row(4), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 1"),
+                   row(1), row(2), row(4), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 2"), row(2), row(4));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 3"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= " + Integer.MAX_VALUE));
+
+        // LT cases with all, some, and no results
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < " + Integer.MAX_VALUE),
+                   row(1), row(2), row(4), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 4"),
+                   row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"),
                    row(1), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 1"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 0"));
+
+        // LTE cases with all, some, and no results
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= " + Integer.MAX_VALUE),
+                   row(1), row(2), row(4), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= 4"),
+                   row(1), row(2), row(4), row(3));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= 2"),
+                   row(1), row(2), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= 1"),
                    row(1), row(3));
-        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 1"));
-        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 5"));
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] <= 0"));
     }
 }
