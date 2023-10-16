@@ -61,6 +61,8 @@ public class EntriesIndexTest extends SAITester
         execute("INSERT INTO %s (partition, item_cost) VALUES (3, {'apple': 1, 'orange': 3})");
 
         // GT cases with all, some, and no results
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > -1"),
+                   row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 0"),
                    row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 1"), row(2), row(4));
@@ -69,6 +71,8 @@ public class EntriesIndexTest extends SAITester
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > " + Integer.MAX_VALUE));
 
         // GTE cases with all, some, and no results
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= -1"),
+                   row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 0"),
                    row(1), row(2), row(4), row(3));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] >= 1"),
@@ -162,5 +166,40 @@ public class EntriesIndexTest extends SAITester
         // Don't get anything
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 2"));
         assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] < 3"));
+    }
+
+    // TODO this test fails right now because the values are indexed as text. Need to understand the deeper issue here.
+    @Test
+    public void queryLargeEntriesWithZeroes()
+    {
+        createTable("CREATE TABLE %s (partition int primary key, item_cost map<text, int>)");
+        createIndex("CREATE CUSTOM INDEX ON %s(entries(item_cost)) USING 'StorageAttachedIndex'");
+        waitForIndexQueryable();
+
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'apple': 101, 'orange': 2})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (4, {'apple': 302, 'orange': 2})");
+        flush();
+        execute("INSERT INTO %s (partition, item_cost) VALUES (2, {'apple': 200, 'orange': 1})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (3, {'apple': 10, 'orange': 3})");
+
+        assertRows(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 2"),
+                   row(1), row(2), row(4), row(3));
+    }
+
+    @Test
+    public void queryLargeTextEntriesWithZeroes()
+    {
+        createTable("CREATE TABLE %s (partition int primary key, item_cost map<text, text>)");
+        createIndex("CREATE CUSTOM INDEX ON %s(entries(item_cost)) USING 'StorageAttachedIndex'");
+        waitForIndexQueryable();
+
+        execute("INSERT INTO %s (partition, item_cost) VALUES (1, {'apple': 'ab0', 'orange': '2'})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (4, {'apple': 'a', 'orange': '2'})");
+        flush();
+        execute("INSERT INTO %s (partition, item_cost) VALUES (2, {'apple': 'abv', 'orange': '1'})");
+        execute("INSERT INTO %s (partition, item_cost) VALUES (3, {'apple': 'z', 'orange': '3'})");
+
+        assertRowsIgnoringOrder(execute("SELECT partition FROM %s WHERE item_cost['apple'] > 'a'"),
+                                row(1), row(2), row(3));
     }
 }
