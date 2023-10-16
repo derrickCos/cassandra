@@ -251,7 +251,7 @@ def train(dataset: str, output_dir: Optional[str] = None):
         alias=f"train",
         cycles=training_cycles_map[dataset],
         threads=2000,
-        errors="count,retry",
+        errors="count,retry,warn",
         workload_args=workload_args,
         labels=get_label_map(dataset=dataset, workload_configs=workload_args)
     )
@@ -270,7 +270,7 @@ def test(dataset: str, output_dir: Optional[str] = None):
         alias=f"test",
         cycles=test_cycles_map[dataset],
         threads=1,
-        errors="count,retry",
+        errors="count,retry,warn",
         workload_args=workload_args,
         labels=get_label_map(dataset=dataset, workload_configs=workload_args)
     )
