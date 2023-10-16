@@ -1,8 +1,23 @@
 #!/bin/bash
 
+# Function to check if JDK 17+ is installed
+check_java_version() {
+  java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+  if [[ $java_version == 17.* || $java_version == 18.* || $java_version == 19.* || $java_version == 2[0-9].* ]]; then
+    echo "JDK 17+ is installed."
+    return 0
+  else
+    echo "JDK 17+ is not installed. Program exiting..."
+    return 1
+  fi
+}
+
+check_java_version
+
 if [ ! -e "library/nb5.jar" ]; then
     cd library 
     curl -OL https://github.com/nosqlbench/nosqlbench/releases/download/5.17.5-preview/nb5.jar
+    chmod +x nb5.jar
     cd ../
 fi
 

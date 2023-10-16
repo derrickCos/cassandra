@@ -86,6 +86,6 @@ cassandra-builds/
 cassandra-dtest/
 
 *.hdf5
-nb5
+nb5*
 testdata/
 nb-bench/artifacts
