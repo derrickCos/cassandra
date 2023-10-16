@@ -112,13 +112,13 @@ def run_nosqlbench_cmd(config: NoSQLBenchConfig, output_dir: Optional[str] = Non
         cmd.append(f"errors={config.errors}")
     for k, v in config.workload_args.items():
         cmd.append(f"{k}={v}")
-    cmd.append("driver=cql")
+    cmd.append("driver=cqld4")
     cmd.append(f"tags={config.tags}")
     cmd.append(f"threads={config.threads}")
     cmd.append("pooling=16:16:1024")
     labels = []
     for k, v in config.labels.items():
-        labels.append(f"{k}={v}")
+        labels.append(f"{k}={v.replace('-','')}")
     labels = ",".join(labels)
     cmd.append("--add-labels")
     cmd.append(f"{labels}")
@@ -140,7 +140,7 @@ def run_nosqlbench_cmd(config: NoSQLBenchConfig, output_dir: Optional[str] = Non
         try:
             for line in iter(proc.stdout.readline, ''):
                 #print(line)
-                with open(nb_output_path, "a") as log_file:
+                with open(nb_output_path, "w") as log_file:
                     log_file.write(line)
                 if "ExecutionResult -- SCENARIO TOOK" in line:
                     proc.terminate()
