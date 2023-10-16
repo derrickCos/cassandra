@@ -19,17 +19,6 @@ bindings:
   test_vector: HdfFileToFloatArray("TEMPLATE(hdf5_path)", "/test") ; ToCqlVector()
   validation_set: HdfFileToIntArray("TEMPLATE(hdf5_path)", "/neighbors")
 
-ops:
-  vop1:
-    stmt: "number:{number} name:{number_name}\n"
-    verifier-imports:
-      - "io.nosqlbench.api.engine.metrics.ActivityMetrics"
-    verifier-init: |
-      recallHisto = ActivityMetrics.histogram(_parsed_op,"recall-histo",4);
-    verifier: |
-      // double recall = vectormath.computeRecall(result,result)
-      recallHisto.update(cycle);
-      return true;
 
 blocks:
   schema:
@@ -79,21 +68,20 @@ blocks:
       - main-select-ann-limit:
           stmt: |
             SELECT * FROM TEMPLATE(keyspace,vector_test).TEMPLATE(table,vectors) ORDER BY value ANN OF {test_vector} LIMIT TEMPLATE(select_limit,100);
-          verifier-imports:
-            - "io.nosqlbench.engine.extensions.vectormath.Intersections"
+          tags:
+            optype: select
           verifier-init: |
-              summaryGauge=io.nosqlbench.api.engine.metrics.ActivityMetrics.summaryGauge(_parsed_op,"recall_intersect");
+            k=TEMPLATE(k,100)
+            relevancy=scriptingmetrics.newRelevancyMeasures(_parsed_op);
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.recall("recall",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.precision("precision",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.F1("F1",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.reciprocal_rank("RR",k));
+            relevancy.addFunction(io.nosqlbench.engine.extensions.computefunctions.RelevancyFunctions.average_precision("AP",k));
           verifier: |
-              ann = vectormath.stringArrayAsIntArray(vectormath.rowFieldsToStringArray("key",result));
-              knn = {validation_set};
-            
-              Arrays.sort(ann);
-              Arrays.sort(knn);
-              
-              intersection = Intersections.count(ann, knn);
-              recall = (double)intersection/(double)knn.length;
-              summaryGauge.accept(recall);
-              return true;
+            actual_indices=cql_utils.cqlStringColumnToIntArray("key",result);
+            relevancy.accept({validation_set},actual_indices);
+            return true;
 
   main-write:
     params:
