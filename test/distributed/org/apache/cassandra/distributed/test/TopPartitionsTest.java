@@ -278,7 +278,7 @@ public class TopPartitionsTest extends TestBaseImpl
                 CLUSTER.get(1).nodetoolResult("repair", "-full", KEYSPACE).asserts().success();
             }
             break;
-            case FullPreview:
+            case FullPJACEK:
             {
                 CLUSTER.get(1).nodetoolResult("repair", "-full", "--preview", KEYSPACE).asserts().success();
             }

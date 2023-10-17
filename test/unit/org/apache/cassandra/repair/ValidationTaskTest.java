@@ -54,7 +54,7 @@ public class ValidationTaskTest
         task.abort(new RuntimeException());
         assertFalse(task.isActive());
         task.treesReceived(new MerkleTrees(null));
-        // REVIEW: setting null would cause NPEs in sync task, so it was never correct to set null
+        // JACEK: setting null would cause NPEs in sync task, so it was never correct to set null
         assertTrue(task.isDone());
         assertFalse(task.isSuccess());
     }

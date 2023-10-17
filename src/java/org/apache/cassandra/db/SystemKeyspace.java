@@ -466,6 +466,15 @@ public final class SystemKeyspace
           + "cfids set<uuid>, "
           + "PRIMARY KEY (parent_id))").build();
 
+    // JACEK: I'm not sure if I understand that - we need to be able to find the fist/last period, and since it is a
+    //        partition key, we need to perform scanning; why don't we create a wide partition instead? This keyspace is
+    //        not distributed anyway, so it should be fine, right?
+    //        If we want to keep it as a partition key, I think we can be smarter searching for a certain period - given:
+    //        - this is TWCS,
+    //        - we are monotonically adding consecutive periods,
+    //        - each sstable contains min and max clustering in its metadata,
+    //        we duplicate the period as the first component of the clustering key. Then, we can learn which sstables
+    //        contain the interesting period by only accessing their statistics.
     public static final TableMetadata LocalMetadataLog =
         parse(METADATA_LOG,
               "Local Metadata Log",

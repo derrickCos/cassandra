@@ -78,15 +78,15 @@ public class SystemKeyspaceStorage implements LogStorage
             // TODO get lowest supported metadata version from ClusterMetadata
             ByteBuffer serializedTransformation = entry.transform.kind().toVersionedBytes(entry.transform);
             String query = String.format("INSERT INTO %s.%s (period, epoch, current_epoch, entry_id, transformation, kind) VALUES (?,?,?,?,?,?)",
-                                         SchemaConstants.SYSTEM_KEYSPACE_NAME, NAME);
+                                         SchemaConstants.SYSTEM_KEYSPACE_NAME, NAME); // JACEK: maybe we can use a prepared statement?
             executeInternal(query, period, entry.epoch.getEpoch(), entry.epoch.getEpoch(),
                             entry.id.entryId, serializedTransformation, entry.transform.kind().toString());
             // todo; should probably not flush every time, but it simplifies tests
-            Keyspace.open(SchemaConstants.SYSTEM_KEYSPACE_NAME).getColumnFamilyStore(NAME).forceBlockingFlush(ColumnFamilyStore.FlushReason.INTERNALLY_FORCED);
+            Keyspace.open(SchemaConstants.SYSTEM_KEYSPACE_NAME).getColumnFamilyStore(NAME).forceBlockingFlush(ColumnFamilyStore.FlushReason.INTERNALLY_FORCED); // JACEK: if flushing is for tests maybe it should be configured with system property?
         }
         catch (Throwable t)
         {
-            logger.error("Could not persist the entry {} proceeding with in-memory commit.", entry, t);
+            logger.error("Could not persist the entry {} proceeding with in-memory commit.", entry, t); // JACEK: no feedback to the caller - why? can we ignore the error and continue?
         }
     }
 

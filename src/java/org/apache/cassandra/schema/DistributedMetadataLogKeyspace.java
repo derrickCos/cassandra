@@ -54,6 +54,7 @@ public final class DistributedMetadataLogKeyspace
 
     private DistributedMetadataLogKeyspace(){}
 
+    // JACEK: rename this field or move it to ClusterMetadataLogTable class
     public static final String TABLE_NAME = "distributed_metadata_log";
 
     /**

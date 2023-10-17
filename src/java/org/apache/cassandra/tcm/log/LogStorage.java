@@ -40,7 +40,7 @@ public interface LogStorage extends LogReader
      * a priority now, especially given there's nothing that prevents us from truncating the log
      * table up to the last snapshot at any given time.
      */
-    LogStorage SystemKeyspace = new SystemKeyspaceStorage();
+    LogStorage SystemKeyspace = new SystemKeyspaceStorage(); // JACEK: usage of particular storage should not be hardcoded - configure storage class in some system property
     LogStorage None = new NoOpLogStorage();
 
     class NoOpLogStorage implements LogStorage

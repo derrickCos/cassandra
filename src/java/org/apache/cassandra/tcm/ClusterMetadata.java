@@ -79,6 +79,13 @@ import org.apache.cassandra.utils.vint.VIntCoding;
 import static org.apache.cassandra.config.CassandraRelevantProperties.LINE_SEPARATOR;
 import static org.apache.cassandra.db.TypeSizes.sizeof;
 
+/**
+ * Represents all transactional metadata of the cluster. It is versioned, immutable and serializable.
+ * CMS guarantees that all the nodes in the cluster see the same cluster metadata for the given epoch.
+ * When the metadata gets updated by a node, the new version must be associated with the new epoch.
+ *
+ * JACEK: should we version the metadata structure? For example, to support new or modified fields in the future?
+ */
 public class ClusterMetadata
 {
     public static final Serializer serializer = new Serializer();

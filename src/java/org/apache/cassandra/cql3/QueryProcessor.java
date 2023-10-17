@@ -462,7 +462,7 @@ public class QueryProcessor implements QueryHandler
         // Set CQL string for AlterSchemaStatement as this is used to serialize the transformation
         // in the cluster metadata log
         if (statement instanceof AlterSchemaStatement)
-            ((AlterSchemaStatement)statement).setCql(query);
+            ((AlterSchemaStatement)statement).setCql(query); // JACEK: can we think about a better way of serializing schema transformations? Why not serializie
 
 
         if (isInternal)

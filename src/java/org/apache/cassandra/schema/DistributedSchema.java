@@ -111,6 +111,8 @@ public class DistributedSchema implements MetadataValue<DistributedSchema>
         initializeKeyspaceInstances(prev, true);
     }
 
+    // JACEK: I don't like this logic being here, this is immutable object and as such should not modify itself
+    // in a method;
     public void initializeKeyspaceInstances(DistributedSchema prev, boolean loadSSTables)
     {
         keyspaceInstances.putAll(prev.keyspaceInstances);

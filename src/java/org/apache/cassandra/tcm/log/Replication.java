@@ -47,6 +47,7 @@ import org.apache.cassandra.tcm.serialization.Version;
 /**
  * A sorted set of log entries mainly used to replicate log entries within the cluster.
  */
+// JACEK: name of this class is misleading
 public class Replication
 {
     private static final Logger logger = LoggerFactory.getLogger(Replication.class);

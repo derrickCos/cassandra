@@ -161,7 +161,7 @@ public class TableMetadata implements SchemaElement
     public final String keyspace;
     public final String name;
     public final TableId id;
-    public final Epoch epoch;
+    public final Epoch epoch; // JACEK: why epoch is attached both to DistributedSchema and TableMetadata?
 
     public final IPartitioner partitioner;
     public final Kind kind;
@@ -193,7 +193,7 @@ public class TableMetadata implements SchemaElement
 
     // performance hacks; TODO see if all are really necessary
     public final DataResource resource;
-    public TableMetadataRef ref;
+    public TableMetadataRef ref; // JACEK: what is the purpose of ref initialized in TableMetadata?
 
     protected TableMetadata(Builder builder)
     {
