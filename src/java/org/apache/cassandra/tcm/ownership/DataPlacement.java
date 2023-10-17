@@ -44,6 +44,7 @@ public class DataPlacement
     // TODO make tree of just EndpointsForRange, navigable by EFR.range()
     // TODO combine peers into a single entity with one vote in any quorum
     //      (e.g. old & new peer must both respond to count one replica)
+    // KATE: placement of read and write replicas
     public final PlacementForRange reads;
     public final PlacementForRange writes;
 
@@ -161,7 +162,7 @@ public class DataPlacement
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<?, ?> e : predicted.entrySet())
         {
-            sb.append(e.getKey()).append("=").append(e.getValue()).append(",\n");
+            sb.append(e.getKey()).append('=').append(e.getValue()).append(",\n");
         }
 
         return sb.toString();

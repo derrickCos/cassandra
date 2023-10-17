@@ -32,6 +32,8 @@ import org.apache.cassandra.tcm.serialization.Version;
 import org.apache.cassandra.tcm.ClusterMetadata;
 import org.apache.cassandra.tcm.sequences.LockedRanges;
 
+// KATE: examples of potential CustomTransformations?
+// JavaDoc
 public class CustomTransformation implements Transformation
 {
     public static Serializer serializer = new Serializer();

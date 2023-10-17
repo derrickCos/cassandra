@@ -4969,6 +4969,8 @@ public class DatabaseDescriptor
     {
         return conf.cms_default_max_retries;
     }
+    //KATE: the name of the method seems to differ from the name of the config parameter;
+    // we also do not have exposed this setter anywhere?
 
     public static void setCmsDefaultRetryMaxTries(int value)
     {

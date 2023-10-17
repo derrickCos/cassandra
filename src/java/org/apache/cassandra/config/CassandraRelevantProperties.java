@@ -505,6 +505,8 @@ public enum CassandraRelevantProperties
     // TODO: not a fan of being forced to prefix these to satisfy the alphabetic ordering constraint
     //       but it makes sense to group logically related properties together
 
+    // KATE: do we have to deprecate some options here instead of direct removal? I am not sure
+    // migration_delay_ms, schema_pull_interval_ms, for example, were removed
     TCM_ALLOW_TRANSFORMATIONS_DURING_UPGRADES("cassandra.allow_transformations_during_upgrades", "false"),
     /**
      * for obtaining acknowlegement from peers to make progress in multi-step operations
@@ -514,6 +516,7 @@ public enum CassandraRelevantProperties
     /**
      * size of in-memory index of max epoch -> sealed period
      */
+    // KATE: so in every period you start counting from 0, so the default allowance is 10 epochs in a sealed period?
     TCM_RECENTLY_SEALED_PERIOD_INDEX_SIZE("cassandra.recently_sealed_period_index_size", "10"),
 
     /**

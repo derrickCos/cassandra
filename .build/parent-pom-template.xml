@@ -339,6 +339,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava-testlib</artifactId>
+        <!-- KATE: this should be upgraded to at least the one we use for guava - 32.0.1, if not even newer -->
         <version>27.0-jre</version>
       </dependency>
       <dependency>

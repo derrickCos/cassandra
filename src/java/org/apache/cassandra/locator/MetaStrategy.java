@@ -29,6 +29,7 @@ import org.apache.cassandra.tcm.ownership.DataPlacement;
 
 import static org.apache.cassandra.tcm.transformations.cms.EntireRange.entireRange;
 
+// KATE: Some javadoc here will be nice to have
 public class MetaStrategy extends SystemStrategy
 {
     public MetaStrategy(String keyspaceName, Map<String, String> configOptions)

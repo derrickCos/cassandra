@@ -279,7 +279,7 @@ public class PlacementForRange
                                                                                          .add(replica, ReplicaCollection.Builder.Conflict.NONE)
                                                                                          .build());
                                                });
-;            if (group == null)
+            if (group == null)
                 replicaGroups.put(replica.range(), VersionedEndpoints.forRange(epoch, EndpointsForRange.of(replica)));
             return this;
 

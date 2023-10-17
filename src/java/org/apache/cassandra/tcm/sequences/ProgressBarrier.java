@@ -75,6 +75,7 @@ public class ProgressBarrier
     private static final Logger logger = LoggerFactory.getLogger(ProgressBarrier.class);
     private static final ConsistencyLevel MIN_CL = DatabaseDescriptor.getProgressBarrierMinConsistencyLevel();
     private static final ConsistencyLevel DEFAULT_CL = DatabaseDescriptor.getProgressBarrierDefaultConsistencyLevel();
+    // KATE: how was 1 hour chosen?
     private static final long TIMEOUT_MILLIS = DatabaseDescriptor.getProgressBarrierTimeout(TimeUnit.MILLISECONDS);
     private static final long BACKOFF_MILLIS = DatabaseDescriptor.getProgressBarrierBackoff(TimeUnit.MILLISECONDS);
 

@@ -98,6 +98,7 @@ public class SystemKeyspaceStorage implements LogStorage
     {
         String query = String.format("SELECT epoch FROM %s.%s LIMIT 1", SchemaConstants.SYSTEM_KEYSPACE_NAME, NAME);
 
+        // KATE: executeInternal can return null?
         for (UntypedResultSet.Row row : executeInternal(query))
             return true;
 

@@ -55,7 +55,7 @@ public abstract class AbstractMutationVerbHandler<T extends IMutation> implement
         {
             ClusterMetadata metadata = ClusterMetadata.current();
             metadata = checkTokenOwnership(metadata, message);
-            metadata = checkSchemaVersion(metadata, message);
+            checkSchemaVersion(metadata, message);
         }
         applyMutation(message, respondTo);
     }
@@ -103,6 +103,8 @@ public abstract class AbstractMutationVerbHandler<T extends IMutation> implement
         return metadata;
     }
 
+    // KATE: Do we need to return here? The return value is not used in the only place we use this method?
+    // Also, maybe this methon can be split instead of being so long?
     private ClusterMetadata checkSchemaVersion(ClusterMetadata metadata, Message<T> message)
     {
         if (SchemaConstants.isSystemKeyspace(message.payload.getKeyspaceName()) || message.epoch().is(metadata.epoch))

@@ -20,6 +20,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# KATE: I am not sure why we need to remove this one; I think it was caught some time ago it was on the classpatch, but
+# it was removed; to be checked
 rm build/test/lib/jars/guava-18.0.jar
 current_dir=$(dirname "$(readlink -f "$0")")
 
@@ -35,7 +37,9 @@ common=(-Dstorage-config=$current_dir/../test/conf
         -Dcassandra.test.sstableformatdevelopment=true
         -Djava.security.egd=file:/dev/urandom
         -Dcassandra.testtag=.jdk11
+        # KATE below line appears twice
         -Dstorage-config=$current_dir/../test/conf
+        # KATE below line appears twice
         -Djava.awt.headless=true
         -Dcassandra.keepBriefBrief=true
         -Dcassandra.allow_simplestrategy=true
@@ -57,6 +61,7 @@ common=(-Dstorage-config=$current_dir/../test/conf
         -Dcassandra.test.logConfigPath=$current_dir/../test/conf/log4j2-dtest-simulator.xml
         -Dcassandra.test.logConfigProperty=log4j.configurationFile
         -Dlog4j2.configurationFile=$current_dir/../test/conf/log4j2-dtest-simulator.xml
+        # KATE: jamm was updated; this would not work
         -javaagent:$current_dir/../lib/jamm-0.3.2.jar
         -javaagent:$current_dir/../build/test/lib/jars/simulator-asm.jar
         -Xbootclasspath/a:$current_dir/../build/test/lib/jars/simulator-bootstrap.jar
@@ -66,9 +71,12 @@ common=(-Dstorage-config=$current_dir/../test/conf
         -XX:CICompilerCount=1
         -XX:Tier4CompileThreshold=1000
         -XX:ReservedCodeCacheSize=256M
+        # KATE: either 4 or 16G for Xmx;
         -Xmx16G
         -Xmx4G
         -Xss384k
+        # KATE I suspect all add-exports and add-opens for all types of tests is better to be located at one place
+        # this will regress very quickly, people will forgot to update one or another
         --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
         --add-exports java.base/jdk.internal.ref=ALL-UNNAMED
         --add-exports java.base/sun.nio.ch=ALL-UNNAMED

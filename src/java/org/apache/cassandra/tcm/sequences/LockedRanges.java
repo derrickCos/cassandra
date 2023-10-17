@@ -50,6 +50,19 @@ import org.apache.cassandra.tcm.serialization.Version;
 
 import static org.apache.cassandra.db.TypeSizes.sizeof;
 
+/* KATE:
+This LockedRanges class represents what ranges are "locked" in the cluster for exclusive access by some process. Key points:
+
+It keeps track of the last modified Epoch.
+The main data structure is a map from LockedRanges.Key to AffectedRanges.
+A Key is just an Epoch indicating who holds the lock.
+AffectedRanges tracks what ranges are locked, per replication strategy.
+Methods like lock() and unlock() modify the internal map to add/remove locked ranges for a key.
+intersects() checks if a given range overlaps with anything currently locked.
+It integrates with the metadata serialization to persist these locked ranges.
+So in summary, this allows nodes to track what ranges are "locked" or in use across the cluster, with knowledge of who locked them.
+It prevents collisions between concurrent operations needing exclusive access. The AffectedRanges allows tracking per replication strategy.*/
+
 public class LockedRanges implements MetadataValue<LockedRanges>
 {
     public static final Serializer serializer = new Serializer();

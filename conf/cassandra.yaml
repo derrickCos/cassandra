@@ -1184,15 +1184,18 @@ range_request_timeout: 10000ms
 # How long the coordinator should wait for writes to complete.
 # Lowest acceptable value is 10 ms.
 # Min unit: ms
+# KATE: default value was changed, why? If it was not by mistake, it needs a change in Config class and all test yamls too
 write_request_timeout: 10000ms
 # How long the coordinator should wait for counter writes to complete.
 # Lowest acceptable value is 10 ms.
 # Min unit: ms
+# KATE: default value was changed, why? If it was not by mistake, it needs a change in Config class and all test yamls too
 counter_write_request_timeout: 1000ms
 # How long a coordinator should continue to retry a CAS operation
 # that contends with other proposals for the same row.
 # Lowest acceptable value is 10 ms.
 # Min unit: ms
+# KATE: default value was changed, why? If it was not by mistake, it needs a change in Config class and all test yamls too
 cas_contention_timeout: 5000ms
 # How long the coordinator should wait for truncates to complete
 # (This can be much longer, because unless auto_snapshot is disabled
@@ -2109,4 +2112,6 @@ drop_compact_storage_enabled: false
 # - Do a rolling restart with all nodes starting with NONE. This sheds the extra cost of checking nodes versions and ensures 
 #   a stable cluster. If a node from a previous version was started by accident we won't any longer toggle behaviors as when UPGRADING.
 #
+# KATE: do we want this on NONE by degault, enabling all features? Was it changed just for testing?
+# There is also this TO DO from Config - // TODO Revisit MessagingService::current_version
 storage_compatibility_mode: NONE

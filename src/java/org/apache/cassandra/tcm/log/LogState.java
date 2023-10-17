@@ -73,7 +73,7 @@ public class LogState
      */
     public final Replication transformations;
 
-    // Uses Replication rather than an just a list of entries primarily to avoid duplicating the existing serializer
+    // Uses Replication rather than just a list of entries primarily to avoid duplicating the existing serializer
     public LogState(ClusterMetadata baseState, Replication transformations)
     {
         this.baseState = baseState;

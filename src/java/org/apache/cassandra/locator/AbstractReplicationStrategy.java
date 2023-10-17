@@ -49,7 +49,7 @@ import org.apache.cassandra.tcm.ownership.DataPlacement;
 import org.apache.cassandra.utils.FBUtilities;
 
 /**
- * A abstract parent for all replication strategies.
+ * An abstract parent for all replication strategies.
 */
 public abstract class AbstractReplicationStrategy
 {
@@ -63,6 +63,7 @@ public abstract class AbstractReplicationStrategy
         this.keyspaceName = keyspaceName;
     }
 
+    // KATE: getPrimaryRangesForEndpoint - deprecated by Sam, this java doc needs update
     /**
      * Calculate the natural endpoints for the given token. Endpoints are returned in the order
      * they occur in the ring following the searchToken, as defined by the replication strategy.

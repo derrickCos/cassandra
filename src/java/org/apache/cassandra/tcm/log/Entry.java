@@ -178,6 +178,32 @@ public class Entry implements Comparable<Entry>
         }
     }
 
+    /*
+    KATE: below text is ChatGPT generated :-)
+
+    * This class is used to generate unique IDs based on a combination of the IP address and a counter.
+    * The IP address is presumably used to ensure uniqueness across multiple machines, while the counter ensures uniqueness
+    * within a single machine.
+counter: An AtomicLong initialized with the current time in milliseconds. The time is bitwise AND-ed with 0x00000000ffffffffL
+* to keep only the lower 32 bits. This probably ensures that the counter starts with a reasonably low value while still being
+* unique across restarts.
+addrComponent: A long that holds the IP address component of the ID.
+The overloaded constructor takes an InetAddressAndPort object, extracts the IP address, and converts it to a long to be used
+* as part of the ID.
+
+* ID Generation (get Method):
+
+The get() method generates a new ID by combining addrComponent and counter. The counter is incremented each time an ID is
+* generated to ensure uniqueness.
+
+IPv6 addresses are more complex than IPv4 addresses. They use 128 bits as opposed to IPv4’s 32 bits, and they can be
+* represented in several different formats. The current code is converting the IP address to a long value, which can only
+*  hold 64 bits. This could potentially lead to loss of information or collisions with IPv6 addresses.
+
+Conclusion
+The DefaultEntryIdGen class is designed to generate unique IDs using a combination of the machine's IP address and a counter.
+* Maybe a hash function?*/
+
     public static class DefaultEntryIdGen implements Supplier<Id>
     {
         private final AtomicLong counter = new AtomicLong(Clock.Global.currentTimeMillis() & 0x00000000ffffffffL);

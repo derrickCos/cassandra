@@ -99,6 +99,8 @@ public abstract class LocalLog implements Closeable
      * However, snapshots should be applied out of order, and snapshots with higher epoch should be applied before snapshots
      * with a lower epoch in cases when there are multiple snapshots present.
      */
+
+    // KATE: Why the higher epoch comes before the lower? Whatever is forced comes first, and then the rest is ordered by epoch.
     protected final ConcurrentSkipListSet<Entry> pending = new ConcurrentSkipListSet<>((Entry e1, Entry e2) -> {
         if (e1.transform.kind() == Transformation.Kind.FORCE_SNAPSHOT && e2.transform.kind() == Transformation.Kind.FORCE_SNAPSHOT)
             return e2.epoch.compareTo(e1.epoch);

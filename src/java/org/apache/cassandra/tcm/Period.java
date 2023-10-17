@@ -45,6 +45,28 @@ import org.apache.cassandra.utils.FBUtilities;
  * Utility methods and classes to work with {@code Period}.
  *
  */
+
+// Can we add a bit more explanation about Period and Epoch here? I understand that Period is again long. It seeems like
+// a point in time that will define a period where to search for an Epoch? Where particular event happened or so? I see
+// we enforce next period on a new logState or new transformation.
+
+/* By looking into ClusterMetadata:
+The key differences between Epoch and Period in the ClusterMetadata class are:
+Epoch represents the version of the metadata. It is incremented on every update to create a new version.
+Period groups together epochs. When metadata is sealed for a period, the period value is incremented but the epoch continues from the last sealed value.
+Epoch is incremented linearly - each new version gets the next epoch number.
+Period represents a batch of epochs corresponding to related updates. It increments independently of the epoch value.
+The epoch value always increases with new metadata versions. The period value only increments when a period is sealed.
+The lastInPeriod flag indicates if the current metadata is the last one for this period.
+So in summary:
+Epoch is for versioning each metadata update. It increments with each update.
+Period groups related epochs and only increments when sealed. It creates batches of epochs.
+Epoch tracks each change. Period tracks
+ batches of changes and seals them. The two numbers increment independently based on different events.
+* */
+
+// Actually SealPeriod has some nice javadoc...
+
 public class Period
 {
     private static final Logger logger = LoggerFactory.getLogger(Period.class);

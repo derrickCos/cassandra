@@ -61,11 +61,13 @@ public interface VersionedEndpoints<E extends Endpoints<E>> extends MetadataValu
             this.endpointsForRange = endpointsForRange;
         }
 
+        @Override
         public ForRange withLastModified(Epoch epoch)
         {
             return new ForRange(lastModified, endpointsForRange);
         }
 
+        @Override
         public Epoch lastModified()
         {
             return lastModified;

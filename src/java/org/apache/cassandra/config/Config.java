@@ -122,6 +122,7 @@ public class Config
     public DiskFailurePolicy disk_failure_policy = DiskFailurePolicy.ignore;
     public CommitFailurePolicy commit_failure_policy = CommitFailurePolicy.stop;
 
+    // KATE: the default was changed?
     public volatile boolean use_deterministic_table_id = true;
 
     /* initial token in the ring */
@@ -171,14 +172,21 @@ public class Config
 
     public volatile DurationSpec.LongMillisecondsBound stream_transfer_task_timeout = new DurationSpec.LongMillisecondsBound("12h");
 
+    // KATE: so timeout to fetch the log, do we want to change the naming or add comment?
+    // Also we make it configurable by having it in Config (anyone knowing about it can add it to their own cassandra.yaml),
+    // but not setter?
     public volatile DurationSpec.LongMillisecondsBound cms_await_timeout = new DurationSpec.LongMillisecondsBound("120000ms");
+    // KATE: I think we can remove the "default_" part, no? It is configurable parameter which default value is set here
     public volatile int cms_default_max_retries = 10;
     public volatile DurationSpec.IntMillisecondsBound cms_default_retry_backoff = new DurationSpec.IntMillisecondsBound("50ms");
     /**
      * How often we should snapshot the cluster metadata.
      */
+    // KATE: 100, what metric? 100 what? 100 ms? 100 s? 100 times? This seems to be epochs per period until automatic snapshoting happens?
+    // Disabled in unit tests?
     public volatile int metadata_snapshot_frequency = 100;
 
+    // Out of curiousity, how were those default values chosen? Methodology?
 
     public volatile double phi_convict_threshold = 8.0;
 
