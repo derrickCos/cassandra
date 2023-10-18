@@ -1,22 +1,8 @@
 #!/bin/bash
 
-# Function to check if JDK 17+ is installed
-check_java_version() {
-  java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
-  if [[ $java_version == 17.* || $java_version == 18.* || $java_version == 19.* || $java_version == 2[0-9].* ]]; then
-    echo "JDK 17+ is installed."
-    return 0
-  else
-    echo "JDK 17+ is not installed. Program exiting..."
-    return 1
-  fi
-}
-
-check_java_version
-
 if [ ! -e "library/nb5.jar" ]; then
-    cd library 
-    curl -OL https://github.com/nosqlbench/nosqlbench/releases/download/5.17.5-preview/nb5.jar
+    cd library
+    curl -OL https://github.com/nosqlbench/nosqlbench/releases/download/5.21.1-preview/nb5.jar
     chmod +x nb5.jar
     cd ../
 fi
@@ -37,4 +23,16 @@ if [ ! -d "testdata" ]; then
     popd
 fi
 
-./recall.py
+echo Drop schema
+java -jar ././library/./nb5.jar cql-vector2 cassandra.drop host=localhost localdc=datacenter1 dataset=glove-100-angular --report-csv-to=././artifacts/glove-100_nb5_logs/metrics:test.*:5s --report-interval=1 keyspace=vector_test dimensions=100 --show-stacktraces 2>&1 | grep '%'
+
+echo Create schema
+java -jar ././library/./nb5.jar cql-vector2 cassandra.schema host=localhost localdc=datacenter1 dataset=glove-100-angular --report-csv-to=././artifacts/glove-100_nb5_logs/metrics:.*:5s --report-interval=1 keyspace=vector_test dimensions=100 --show-stacktraces 2>&1 | grep '%'
+
+echo Train
+java -jar ././library/./nb5.jar cql-vector2 cassandra.rampup host=localhost localdc=datacenter1 dataset=glove-100-angular trainsize=1183514 --report-csv-to=././artifacts/glove-100_nb5_logs/metrics:.*:5s --report-interval=1 keyspace=vector_test dimensions=100 --show-stacktraces 2>&1 | grep '%'
+
+echo Test
+java -jar ././library/./nb5.jar cql-vector2 cassandra.read_recall host=localhost localdc=datacenter1 dataset=glove-100-angular testsize=10000 --report-csv-to=././artifacts/glove-100_nb5_logs/metrics:.*:5s --report-interval=1 keyspace=vector_test dimensions=100 --show-stacktraces 2>&1 | grep '%'
+
+./summarize.py
