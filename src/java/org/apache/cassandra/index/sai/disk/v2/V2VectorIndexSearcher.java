@@ -161,7 +161,7 @@ public class V2VectorIndexSearcher extends IndexSearcher implements SegmentOrder
             // If we didn't find the first key, we won't find the last primary key either
             if (minSSTableRowId < 0)
                 return new BitsOrPostingList(PostingList.EMPTY);
-            long maxSSTableRowId = getMaxSSTableRowId(primaryKeyMap, keyRange);
+            long maxSSTableRowId = getMaxSSTableRowId(primaryKeyMap, keyRange.right);
 
             if (minSSTableRowId > maxSSTableRowId)
                 return new BitsOrPostingList(PostingList.EMPTY);
@@ -224,14 +224,14 @@ public class V2VectorIndexSearcher extends IndexSearcher implements SegmentOrder
         }
     }
 
-    private long getMaxSSTableRowId(PrimaryKeyMap primaryKeyMap, AbstractBounds<PartitionPosition> keyRange)
+    private long getMaxSSTableRowId(PrimaryKeyMap primaryKeyMap, PartitionPosition right)
     {
         // if the right token is the minimum token, there is no upper bound on the keyRange and
         // we can save a lookup by using the maxSSTableRowId
-        if (keyRange.right.isMinimum())
+        if (right.isMinimum())
             return metadata.maxSSTableRowId;
 
-        PrimaryKey lastPrimaryKey = keyFactory.createTokenOnly(keyRange.right.getToken());
+        PrimaryKey lastPrimaryKey = keyFactory.createTokenOnly(right.getToken());
         long max = primaryKeyMap.floor(lastPrimaryKey);
         if (max < 0)
             return metadata.maxSSTableRowId;
