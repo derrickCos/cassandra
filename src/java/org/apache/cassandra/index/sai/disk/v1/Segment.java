@@ -23,6 +23,8 @@ import java.io.IOException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 
+import org.slf4j.Logger;
+
 import org.apache.cassandra.db.PartitionPosition;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.dht.AbstractBounds;
@@ -46,6 +48,8 @@ import org.apache.cassandra.io.util.FileUtils;
  */
 public class Segment implements Closeable, SegmentOrdering
 {
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(Segment.class);
+    
     private final Token minKey;
     private final Token.KeyBound minKeyBound;
     private final Token maxKey;
@@ -88,9 +92,11 @@ public class Segment implements Closeable, SegmentOrdering
             }
             // opening with the global format didn't work.  that means that (unless it's actually corrupt)
             // the correct version is whichever one the global format is not set to
-            var otherVersion = version == Version.CA ? Version.BA : Version.CA;
-            searcher = otherVersion.onDiskFormat().newIndexSearcher(sstableContext, indexContext, indexFiles, metadata);
+            version = version == Version.CA ? Version.BA : Version.CA;
+            searcher = version.onDiskFormat().newIndexSearcher(sstableContext, indexContext, indexFiles, metadata);
         }
+        logger.info("Opened searcher {} for segment {} at version {}",
+                    searcher.getClass().getName(), sstableContext.descriptor(), version);
         this.index = searcher;
     }
 
