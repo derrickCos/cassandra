@@ -20,7 +20,7 @@ def getStat(file_name, column):
     FROM my_table;
     '''
     
-    result = con.query(query).fetchall()
+    result = con.query(query).fetchall()[0][0]
 
     con.execute(f"DROP TABLE my_table;")
 
@@ -31,6 +31,6 @@ def getStat(file_name, column):
 recall = getStat('search_and_index__recall_100_op_search_and_index__select_ann_limit_100___stat_Average___workload_cql_vector2.csv','value')
 print(f"Recall: {recall}")
 rate = getStat('search_and_index__result_success_workload_cql_vector2.csv','m1_rate')
-print(f"Train Rate: {recall}")
+print(f"Train Rate: {rate}")
 rate = getStat('rampup__result_success_workload_cql_vector2.csv','m1_rate')
-print(f"Test Rate: {recall}")
+print(f"Test Rate: {rate}")
