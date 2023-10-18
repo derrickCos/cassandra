@@ -39,6 +39,7 @@ import io.netty.util.concurrent.FastThreadLocal;
 import org.apache.cassandra.db.Clustering;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.PartitionPosition;
+import org.apache.cassandra.db.marshal.CompositeType;
 import org.apache.cassandra.db.memtable.TrieMemtable;
 import org.apache.cassandra.db.tries.MemtableTrie;
 import org.apache.cassandra.db.tries.Trie;
@@ -192,7 +193,10 @@ public class TrieMemoryIndex extends MemoryIndex
         boolean lowerInclusive, upperInclusive;
         if (expression.lower != null)
         {
-            lowerBound = encode(expression.lower.value.encoded);
+            if (expression.validator instanceof CompositeType)
+                lowerBound = encode(CompositeType.extractFirstComponentAsTrieSearchPrefix(expression.lower.value.encoded, true));
+            else
+                lowerBound = encode(expression.lower.value.encoded);
             lowerInclusive = expression.lower.inclusive;
         }
         else
@@ -203,7 +207,10 @@ public class TrieMemoryIndex extends MemoryIndex
 
         if (expression.upper != null)
         {
-            upperBound = encode(expression.upper.value.encoded);
+            if (expression.validator instanceof CompositeType)
+                upperBound = encode(CompositeType.extractFirstComponentAsTrieSearchPrefix(expression.upper.value.encoded, false));
+            else
+                upperBound = encode(expression.upper.value.encoded);
             upperInclusive = expression.upper.inclusive;
         }
         else
@@ -213,8 +220,17 @@ public class TrieMemoryIndex extends MemoryIndex
         }
 
         Collector cd = new Collector(keyRange);
-
-        data.subtrie(lowerBound, lowerInclusive, upperBound, upperInclusive).values().forEach(cd::processContent);
+        Trie<PrimaryKeys> subtrie = data.subtrie(lowerBound, lowerInclusive, upperBound, upperInclusive);
+        if (expression.validator instanceof CompositeType)
+            subtrie.entrySet().forEach(entry -> {
+                // TODO why do we decode here and not when we read from disk? (just curious to know how it works)
+                ByteComparable decoded = decode(entry.getKey());
+                byte[] key = ByteSourceInverse.readBytes(decoded.asComparableBytes(ByteComparable.Version.OSS41));
+                if (expression.isSatisfiedBy(ByteBuffer.wrap(key)))
+                    cd.processContent(entry.getValue());
+            });
+        else
+            data.subtrie(lowerBound, lowerInclusive, upperBound, upperInclusive).values().forEach(cd::processContent);
 
         if (cd.mergedKeys.isEmpty())
         {

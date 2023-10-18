@@ -19,23 +19,33 @@
 package org.apache.cassandra.index.sai.disk.v1.postings;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import com.google.common.collect.PeekingIterator;
 
 import org.apache.cassandra.index.sai.disk.PostingList;
 import org.apache.cassandra.index.sai.metrics.QueryEventListener;
+import org.apache.cassandra.index.sai.plan.Expression;
+import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.cassandra.utils.Pair;
+import org.apache.cassandra.utils.bytecomparable.ByteComparable;
+import org.apache.cassandra.utils.bytecomparable.ByteSource;
+import org.apache.cassandra.utils.bytecomparable.ByteSourceInverse;
 import org.apache.lucene.store.IndexInput;
 
 public class TraversingPostingsReader implements PostingList
 {
+    private final Expression exp;
     private final IndexInput input;
-    private final PeekingIterator<Long> iterable;
+    private final PeekingIterator<Pair<ByteSource,Long>> iterable;
     private final QueryEventListener.PostingListEventListener listener;
 
     private PostingsReader currentReader;
 
-    public TraversingPostingsReader(IndexInput input, PeekingIterator<Long> iterable, QueryEventListener.PostingListEventListener listener) throws IOException
+    public TraversingPostingsReader(Expression exp, IndexInput input, PeekingIterator<Pair<ByteSource,Long>> iterable, QueryEventListener.PostingListEventListener listener) throws IOException
     {
+        this.exp = exp;
         this.input = input;
         this.iterable = iterable;
         this.listener = listener;
@@ -46,9 +56,12 @@ public class TraversingPostingsReader implements PostingList
         if (iterable.hasNext())
         {
             var next = iterable.next();
-            // TODO need to read all of the values
-            // TODO how expensive am I? Is there a better way to do this?
-            return new PostingsReader(input, next, listener).nextPosting();
+            byte[] nextBytes = ByteSourceInverse.readBytes(next.left);
+            if (exp.isSatisfiedBy(ByteBuffer.wrap(nextBytes)))
+                // TODO need to read all of the values
+                // TODO how expensive am I? Is there a better way to do this?
+                return new PostingsReader(input, next.right, listener).nextPosting();
+            return nextPosting();
         }
         else
         {

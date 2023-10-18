@@ -122,8 +122,8 @@ public class SortedTermsReader
                                                               true,
                                                               true))
         {
-            final Iterator<Long> iterator = reader.iterator();
-            return iterator.hasNext() ? iterator.next() : NOT_FOUND;
+            final Iterator<Pair<ByteSource, Long>> iterator = reader.iterator();
+            return iterator.hasNext() ? iterator.next().right() : NOT_FOUND;
         }
     }
 

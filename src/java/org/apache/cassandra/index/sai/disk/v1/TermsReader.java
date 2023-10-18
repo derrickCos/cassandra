@@ -29,6 +29,7 @@ import com.google.common.collect.Iterators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.cassandra.db.marshal.CompositeType;
 import org.apache.cassandra.index.sai.IndexContext;
 import org.apache.cassandra.index.sai.QueryContext;
 import org.apache.cassandra.index.sai.disk.PostingList;
@@ -234,10 +235,15 @@ public class TermsReader implements Closeable
             this.context = context;
         }
 
+        private ByteComparable getByteComparable(ByteBuffer byteBuffer, boolean isLower)
+        {
+            return ByteComparable.fixedLength(CompositeType.extractFirstComponentAsTrieSearchPrefix(byteBuffer, isLower));
+        }
+
         public PostingList execute()
         {
-            final ByteComparable lower = exp.lower != null ? ByteComparable.fixedLength(exp.lower.value.encoded) : null;
-            final ByteComparable upper = exp.upper != null ? ByteComparable.fixedLength(exp.upper.value.encoded) : null;
+            final ByteComparable lower = exp.lower != null ? getByteComparable(exp.lower.value.encoded, true) : null;
+            final ByteComparable upper = exp.upper != null ? getByteComparable(exp.upper.value.encoded, false) : null;
             try (TrieRangeIterator reader = new TrieRangeIterator(termDictionaryFile.instantiateRebufferer(),
                                                                   termDictionaryRoot,
                                                                   lower,
@@ -255,7 +261,7 @@ public class TermsReader implements Closeable
 
                 context.checkpoint();
 
-                return new TraversingPostingsReader(postingsInput, iter, listener.postingListEventListener());
+                return new TraversingPostingsReader(exp, postingsInput, iter, listener.postingListEventListener());
             }
             catch (Throwable e)
             {

@@ -379,6 +379,26 @@ public class CompositeType extends AbstractCompositeType
         return null;
     }
 
+    public static ByteBuffer extractFirstComponentAsTrieSearchPrefix(ByteBuffer bb, boolean isLowerBound)
+    {
+        bb = bb.duplicate();
+        readStatic(bb);
+        if (bb.remaining() == 0)
+            return null;
+
+        // We need the first two bytes, the component itself, and the end-of-component byte
+        int componentLength = bb.getShort(bb.position()) + 3;
+        if (isLowerBound)
+            return bb.limit(componentLength);
+
+        // We need to copy the first component and set the end-of-component byte to 1.
+        // See class's javadoc for explanation.
+        var dest = ByteBuffer.allocate(componentLength);
+        ByteBufferUtil.copyBytes(bb, bb.position(), dest, 0, componentLength - 1);
+        dest.put(componentLength - 1, (byte) 1);
+        return dest;
+    }
+
     public static <V> boolean isStaticName(V value, ValueAccessor<V> accessor)
     {
         return accessor.size(value) >= 2 && (accessor.getUnsignedShort(value, 0) & 0xFFFF) == STATIC_MARKER;

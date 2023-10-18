@@ -206,6 +206,7 @@ public class Expression
         return this;
     }
 
+    // VSTODO seems like we could optimize for CompositeType here since we know we have a key match
     public boolean isSatisfiedBy(ByteBuffer columnValue)
     {
         if (validator.isVector())
